@@ -306,8 +306,8 @@ SELECT article_immov, date_built, address_, purchase, district, status_
 SELECT article_immov, date_built
        FROM immovables
        WHERE description_key = 1 and TO_CHAR (date_built, 'YYYY') >= ALL (SELECT TO_CHAR (date_built, 'YYYY')
-							                            FROM immovables
-                                                        WHERE description_key = 2);
+							                                FROM immovables
+                                                                                 WHERE description_key = 2);
 
 
 /*     10. -      с использованием предиката EXISTS/NOT EXISTS с подзапросом:
