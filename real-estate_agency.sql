@@ -221,12 +221,33 @@ SELECT  article_immov AS article, date_built, b.article_desc AS immov_type, purc
 
 -- 4. «Общий список покупателей и продавцов с количеством сделок» (запрос на объединение):
 
-SELECT second_name, first_name, middle_name, registration AS address, telephone_number  -- Изменить
-       FROM consumer
+SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  consumer' "ФИО и СТАТУС", COUNT (b.vendee_key) "Количество участий в сделках:"
+       FROM consumer s, flows b
+       WHERE s.consumers_key = b.vendee_key
+       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  consumer'
 UNION
-SELECT second_name, first_name, middle_name, official_seat AS address, telephone_number
-       FROM vender; -- Доделать чтобы было количество сделок + тип (сотрудник/клиент) + ФИО
-       
+SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  consumer' "ФИО и СТАТУС", COUNT (b.possessors_key) "Количество участий в сделках:"
+       FROM consumer s, flows b
+       WHERE s.consumers_key = b.possessors_key
+       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  consumer'
+UNION
+SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender' "ФИО и СТАТУС", COUNT (b.venders_key) "Количество участий в сделках:"
+       FROM vender s, flows b
+       WHERE s.venders_key = b.venders_key
+       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender';
+
+       -- ИЛИ --
+
+SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  consumer' "ФИО и СТАТУС", COUNT (s.consumers_key) "Количество участий в сделках:"
+       FROM consumer s, flows b
+       WHERE s.consumers_key = b.vendee_key or s.consumers_key = b.possessors_key
+       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  consumer'
+UNION
+SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender' "ФИО и СТАТУС", COUNT (b.venders_key) "Количество участий в сделках:"
+       FROM vender s, flows b
+       WHERE s.venders_key = b.venders_key
+       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender';
+
 
 -- 5. «Количество сделок по районам и по годам» (запрос по полю с типом дата):
 
@@ -351,7 +372,9 @@ ALTER TABLE immovables
             RENAME COLUMN year_built TO date_built;
 
 
-*/
+
+
+
 
 cd D:/GitHub/IOSU
 git init
@@ -360,3 +383,5 @@ git commit -m "Tables, synonyms, inserts"
 git branch -M master
 git remote add origin https://github.com/DaniilKotkovskiy/IOSU.git
 git push -u origin master
+
+*/
