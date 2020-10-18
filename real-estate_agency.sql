@@ -300,14 +300,14 @@ SELECT article_immov, date_built, address_, purchase, district, status_
 
 
 /*     9. -      с использованием предиката ANY/ALL с подзапросом:
-                     «Вывести информацию о клиентах агентства недвижимости, которые имели статус владельца при совешении сделки»:
+                     «Вывести квартиры, год постройки которых больше, чем год постройки любого из домов»:
 */
 
-SELECT second_name, first_name, middle_name, registration, telephone_number, age -- Изменить
-       FROM consumer
-       WHERE consumers_key = ANY (SELECT possessors_key
-										 FROM flows
-										 WHERE consumers_character = 'possessor'); -- Неправильно, нужны поля количества, суммы, даты (Должны быть сравнения без математических операций) (Пример: вывести всех сотрудников старше менеджера)
+SELECT article_immov, date_built
+       FROM immovables
+       WHERE description_key = 1 and TO_CHAR (date_built, 'YYYY') >= ALL (SELECT TO_CHAR (date_built, 'YYYY')
+							                            FROM immovables
+                                                        WHERE description_key = 2);
 
 
 /*     10. -      с использованием предиката EXISTS/NOT EXISTS с подзапросом:
