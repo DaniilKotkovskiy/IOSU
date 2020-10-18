@@ -236,7 +236,7 @@ SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vend
        WHERE s.venders_key = b.venders_key
        GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender';
 
-       -- ИЛИ --
+-- ИЛИ --
 
 SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  consumer' "ФИО и СТАТУС", COUNT (s.consumers_key) "Количество участий в сделках:"
        FROM consumer s, flows b
@@ -251,14 +251,10 @@ SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vend
 
 -- 5. «Количество сделок по районам и по годам» (запрос по полю с типом дата):
 
-SELECT *  -- Изменить
-       FROM 
-       (SELECT s.district, b.transaction_date_and_time 
-             FROM immovables s, flows b 
-             WHERE s.immovable_key = b.immovable_key)
-       PIVOT
-       (COUNT (transaction_date_and_time) FOR transaction_date_and_time IN ('yy'))
-       ORDER BY transaction_date_and_time; -- Как это делать? Сделать районы + посчитать количество по годам                или 			количество по годам.
+SELECT TO_CHAR (transaction_date_and_time, 'YYYY') "ГОД", COUNT (flows_key) "КОЛИЧЕСТВО СДЕЛОК В ГОДУ"
+       FROM flows
+       GROUP BY TO_CHAR (transaction_date_and_time, 'YYYY')
+       ORDER BY TO_CHAR (transaction_date_and_time, 'YYYY') DESC;
 
 
 /* {ЗАДАНИЕ}
