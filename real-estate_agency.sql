@@ -283,6 +283,10 @@ SELECT second_name || ' ' || first_name || ' ' || middle_name AS FIO, transactio
 SELECT article_immov, date_built, address_, district, status_, transaction_date_and_time -- Изменить
         FROM immovables LEFT JOIN flows USING (immovable_key); -- Исправить Работа с данными
 
+SELECT article_immov, date_built, address_, district, status_, transaction_date_and_time
+        FROM immovables LEFT JOIN flows USING (immovable_key)
+        ORDER BY transaction_date_and_time;
+
 
 /*     8. -      с использованием предиката IN с подзапросом:
                      «Вывести список и информацию о частных домах, когда-либо внесенных в БД агентства»:
