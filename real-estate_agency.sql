@@ -234,7 +234,7 @@ UNION
 SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender' "ФИО и СТАТУС", COUNT (b.venders_key) "Количество участий в сделках:"
        FROM vender s, flows b
        WHERE s.venders_key = b.venders_key
-       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender';
+       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender'; -- Зачтено!
 
 -- ИЛИ --
 
@@ -246,7 +246,7 @@ UNION
 SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender' "ФИО и СТАТУС", COUNT (b.venders_key) "Количество участий в сделках:"
        FROM vender s, flows b
        WHERE s.venders_key = b.venders_key
-       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender';
+       GROUP BY s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vender'; -- Зачтено!
 
 
 -- 5. «Количество сделок по районам и по годам» (запрос по полю с типом дата):
@@ -254,7 +254,7 @@ SELECT s.second_name || ' ' || s.first_name || ' ' || s.middle_name || ' -  vend
 SELECT TO_CHAR (transaction_date_and_time, 'YYYY') "ГОД", COUNT (flows_key) "КОЛИЧЕСТВО СДЕЛОК В ГОДУ"
        FROM flows
        GROUP BY TO_CHAR (transaction_date_and_time, 'YYYY')
-       ORDER BY TO_CHAR (transaction_date_and_time, 'YYYY') DESC;
+       ORDER BY TO_CHAR (transaction_date_and_time, 'YYYY') DESC; -- Зачтено!
 
 
 /* {ЗАДАНИЕ}
@@ -285,7 +285,7 @@ SELECT article_immov, date_built, address_, district, status_, transaction_date_
 
 SELECT article_immov, date_built, address_, district, status_, transaction_date_and_time
         FROM immovables LEFT JOIN flows USING (immovable_key)
-        ORDER BY transaction_date_and_time;
+        ORDER BY transaction_date_and_time; -- Зачтено!
 
 
 /*     8. -      с использованием предиката IN с подзапросом:
@@ -307,7 +307,7 @@ SELECT article_immov, date_built
        FROM immovables
        WHERE description_key = 1 and TO_CHAR (date_built, 'YYYY') >= ALL (SELECT TO_CHAR (date_built, 'YYYY')
 							                                FROM immovables
-                                                                                 WHERE description_key = 2);
+                                                                                 WHERE description_key = 2); -- Зачтено!
 
 
 /*     10. -      с использованием предиката EXISTS/NOT EXISTS с подзапросом:
