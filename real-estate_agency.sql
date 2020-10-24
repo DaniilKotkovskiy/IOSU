@@ -364,7 +364,7 @@ SELECT * FROM view_flows;
 CREATE OR REPLACE VIEW view_consumer AS
                   SELECT *
                          FROM consumer
-                         WHERE to_char(sysdate, 'dy') in('mon', 'tue', 'wed', 'thu', 'fri') and to_char(sysdate, 'hh24') BETWEEN 12 AND 20
+                         WHERE to_char(sysdate, 'dy') in('mon', 'tue', 'wed', 'thu', 'fri') and to_char(sysdate, 'hh24') BETWEEN 6 AND 14
                          WITH CHECK OPTION;
 
 SELECT * FROM view_consumer;
