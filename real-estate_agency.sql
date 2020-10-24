@@ -168,6 +168,7 @@ insert into immovables values (17, 'House number 36', '04.19.2012', 2, '990000.0
 insert into immovables values (18, 'Apartment number 58', '09.16.1899', 1, '130000.00', 'Minsk city, Kuleshova street, house 10, apartment 58', 'zavodskoy', 'sold'); --Закинул в APEXOracle
 insert into immovables values (19, 'Usadba Vojik', '08.12.2013', 2, '1200000.38', 'Minsk city, Vesninka street, house 10', 'centralniy', 'sold'); --Закинул в APEXOracle
 insert into immovables values (20, 'Apartment number 85', '06.23.1995', 1, '467000.00', 'Minsk city, Pushkona prospect, house 87, apartment 85', 'frunzenskiy', 'sold'); --Закинул в APEXOracle
+insert into immovables values (21, 'Apartment number 99', '12.11.1888', 1, '888888.00', 'Minsk city, Pushkona prospect, house 77, apartment 99', 'frunzenskiy', 'for_sale'); --Закинул в APEXOracle
 
 insert into flows values (1, 2, 5, 2, 2, '154035.64', '22-MAR-2004 01.14.00.410527 PM', 11); --Закинул в APEXOracle
 insert into flows values (2, 1, 3, 5, 20, '476340.00', '14-AUG-2008 05.00.00.410989 PM', 13); --Закинул в APEXOracle
@@ -322,10 +323,16 @@ SELECT second_name, first_name, middle_name, registration, telephone_number, age
 
 
 
+-------------------------------------------------------------------- ПРЕДСТАВЛЕНИЯ -------------------------------------------------------------------------
 
 
 
+-- Горизонтальтное обновляемое представление:
 
+CREATE OR REPLACE VIEW view_immovables_for_sale AS
+                  SELECT s.article_immov "НАЗВАНИЕ", s.date_built "ДАТА СТРОИТЕЛЬСТВА", b.article_desc "ТИП НЕДАИЖИМОСТИ", s.purchase "СТОИМОСТЬ", s.address_ "АДРЕС", s.district "РАЙОН", s.status_ "СТАТУС"
+                         FROM immovables s, immovables_description b
+                         WHERE s.description_key = b.description_key and status_ IN ('for_sale');
 
 
 
@@ -371,6 +378,8 @@ select * from wwv_flow_months_month;
 ALTER TABLE immovables
             RENAME COLUMN year_built TO date_built;
 
+
+SELECT * FROM view_immovables_for_sale
 
 
 
