@@ -361,7 +361,21 @@ SELECT * FROM view_flows;
 
 -- Создать обновляемое представление для работы с одной из родительских таблиц индивидуальной БД и через него разрешить работу с данными только в рабочие дни (с понедельника по пятницу) и в рабочие часы (с 9:00 до 17:00)
 
+CREATE OR REPLACE VIEW view_consumer AS
+                  SELECT *
+                         FROM consumer
+                         WHERE to_char(sysdate, 'dy') in('mon', 'tue', 'wed', 'thu', 'fri') and to_char(sysdate, 'hh24') BETWEEN 12 AND 20
+                         WITH CHECK OPTION;
 
+SELECT * FROM view_consumer;
+
+UPDATE view_consumer
+       SET second_name = 'Barshot'
+       WHERE consumers_key = 1;
+
+
+
+       
 
 
 
