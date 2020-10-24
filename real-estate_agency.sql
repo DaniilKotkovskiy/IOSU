@@ -330,9 +330,26 @@ SELECT second_name, first_name, middle_name, registration, telephone_number, age
 -- Горизонтальтное обновляемое представление:
 
 CREATE OR REPLACE VIEW view_immovables_for_sale AS
-                  SELECT s.article_immov "НАЗВАНИЕ", s.date_built "ДАТА СТРОИТЕЛЬСТВА", b.article_desc "ТИП НЕДАИЖИМОСТИ", s.purchase "СТОИМОСТЬ", s.address_ "АДРЕС", s.district "РАЙОН", s.status_ "СТАТУС"
-                         FROM immovables s, immovables_description b
-                         WHERE s.description_key = b.description_key and status_ IN ('for_sale');
+                  SELECT *
+                         FROM immovables
+                         WHERE status_ IN ('for_sale')
+
+SELECT * FROM view_immovables_for_sale
+
+UPDATE view_immovables_for_sale
+       SET purchase = 999999.99
+       WHERE immovable_key = 21
+
+
+-- Вертикальное или смешанное необновляемое представление, пред-назначенное для работы с основной задачей БД (в представлении должны содержаться сведения из главной таблицы, но вместо внешних ключей необ-ходимо использовать связанные данные из родительской таблицы)
+
+CREATE OR REPLACE VIEW view_flows AS
+                  SELECT p.article_tature "ТИП СДЕЛКИ", b.second_name "ФАМИЛИЯ ПРОДАВЦА", r.second_name "ФАМИЛИЯ ПОКУПАТЕЛЯ", f.article_immov "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ", bottom_line_price "СТОИМОСТЬ", transaction_date_and_time "ДАТА И ВРЕМЯ СДЕЛКИ", n.second_name "ФАМИЛИЯ ВЛАДЕЛЬЦА"
+                         FROM flows s, tature_of_transactions p, vender b, consumer r, immovables f, consumer n
+                         WHERE p.tature_of_transactions_key = s.tature_of_transaction_key and b.venders_key = s.venders_key and f.immovable_key = s.immovable_key and s.vendee_key = r.consumers_key and s.possessors_key = n.consumers_key
+                         WITH READ ONLY;
+
+SELECT * FROM view_flows
 
 
 
