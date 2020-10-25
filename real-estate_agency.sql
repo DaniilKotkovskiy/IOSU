@@ -351,7 +351,7 @@ UPDATE view_immovables_for_sale
 -- Вертикальное или смешанное необновляемое представление, пред-назначенное для работы с основной задачей БД (в представлении должны содержаться сведения из главной таблицы, но вместо внешних ключей необ-ходимо использовать связанные данные из родительской таблицы)
 
 CREATE OR REPLACE VIEW view_flows AS
-                  SELECT p.article_tature "ТИП СДЕЛКИ", b.second_name "ФАМИЛИЯ ПРОДАВЦА", r.second_name "ФАМИЛИЯ ПОКУПАТЕЛЯ", f.article_immov "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ", bottom_line_price "СТОИМОСТЬ", transaction_date_and_time "ДАТА И ВРЕМЯ СДЕЛКИ", n.second_name "ФАМИЛИЯ ВЛАДЕЛЬЦА"
+                  SELECT p.article_tature "ТИП СДЕЛКИ", b.second_name ||' '|| b.first_name ||' '|| b.middle_name "ФИО ПРОДАВЦА", r.second_name ||' '|| r.first_name ||' '|| r.middle_name "ФИО ПОКУПАТЕЛЯ", f.article_immov "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ", bottom_line_price "СТОИМОСТЬ", transaction_date_and_time "ДАТА И ВРЕМЯ СДЕЛКИ", n.second_name ||' '|| n.first_name ||' '|| n.middle_name "ФИО ВЛАДЕЛЬЦА"
                          FROM flows s, tature_of_transactions p, vender b, consumer r, immovables f, consumer n
                          WHERE p.tature_of_transactions_key = s.tature_of_transaction_key and b.venders_key = s.venders_key and f.immovable_key = s.immovable_key and s.vendee_key = r.consumers_key and s.possessors_key = n.consumers_key
                          WITH READ ONLY;
