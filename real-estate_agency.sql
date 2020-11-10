@@ -169,6 +169,8 @@ insert into immovables values (18, 'Apartment number 58', '09.16.1899', 1, '1300
 insert into immovables values (19, 'Usadba Vojik', '08.12.2013', 2, '1200000.38', 'Minsk city, Vesninka street, house 10', 'centralniy', 'sold'); --Закинул в APEXOracle
 insert into immovables values (20, 'Apartment number 85', '06.23.1995', 1, '467000.00', 'Minsk city, Pushkona prospect, house 87, apartment 85', 'frunzenskiy', 'sold'); --Закинул в APEXOracle
 insert into immovables values (21, 'Apartment number 99', '12.11.1888', 1, '888888.00', 'Minsk city, Pushkona prospect, house 77, apartment 99', 'frunzenskiy', 'for_sale'); --Закинул в APEXOracle
+insert into immovables values (22, 'House number 16', '11.05.2005', 2, '660000.38', 'Minsk city, Evgenia Glebova street, house 16', 'partisanskiy', 'off_the_market'); --Закинул в APEXOracle
+insert into immovables values (23, 'House number 22', '09.14.2008', 2, '780000.66', 'Minsk city, Evgenia Glebova street, house 22', 'partisanskiy', 'off_the_market'); --Закинул в APEXOracle
 
 insert into flows values (1, 2, 5, 2, 2, '154035.64', '22-MAR-2004 01.14.00.410527 PM', 11); --Закинул в APEXOracle
 insert into flows values (2, 1, 3, 5, 20, '476340.00', '14-AUG-2008 05.00.00.410989 PM', 13); --Закинул в APEXOracle
@@ -347,6 +349,9 @@ UPDATE view_immovables_for_sale
        SET purchase = 888888.00
        WHERE address_ = 'Minsk city, Pushkona prospect, house 77, apartment 99'
 
+insert into view_immovables_for_sale values (21, 'Apartment number 99', '12.11.1888', 1, '888888.00', 'Minsk city, Pushkona prospect, house 77, apartment 99', 'frunzenskiy', 'for_sale');
+insert into view_immovables_for_sale values (22, 'House number 16', '11.05.2005', 2, '660000.38', 'Minsk city, Evgenia Glebova street, house 16', 'partisanskiy', 'off_the_market');
+insert into view_immovables_for_sale values (23, 'House number 22', '09.14.2008', 2, '780000.66', 'Minsk city, Evgenia Glebova street, house 22', 'partisanskiy', 'off_the_market');
 
 -- Вертикальное или смешанное необновляемое представление, пред-назначенное для работы с основной задачей БД (в представлении должны содержаться сведения из главной таблицы, но вместо внешних ключей необ-ходимо использовать связанные данные из родительской таблицы)
 
