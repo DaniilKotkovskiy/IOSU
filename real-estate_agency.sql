@@ -358,10 +358,12 @@ insert into view_immovables_for_sale values (23, 'House number 22', '09.14.2008'
 CREATE OR REPLACE VIEW view_flows AS
                   SELECT p.article_tature "ТИП СДЕЛКИ", b.second_name ||' '|| b.first_name ||' '|| b.middle_name "ФИО ПРОДАВЦА", r.second_name ||' '|| r.first_name ||' '|| r.middle_name "ФИО ПОКУПАТЕЛЯ", f.article_immov "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ", bottom_line_price "СТОИМОСТЬ", transaction_date_and_time "ДАТА И ВРЕМЯ СДЕЛКИ", n.second_name ||' '|| n.first_name ||' '|| n.middle_name "ФИО ВЛАДЕЛЬЦА"
                          FROM flows s, tature_of_transactions p, vender b, consumer r, immovables f, consumer n
-                         WHERE p.tature_of_transactions_key = s.tature_of_transaction_key and b.venders_key = s.venders_key and f.immovable_key = s.immovable_key and s.vendee_key = r.consumers_key and s.possessors_key = n.consumers_key
-                         WITH READ ONLY;
+                         WHERE p.tature_of_transactions_key = s.tature_of_transaction_key and b.venders_key = s.venders_key and f.immovable_key = s.immovable_key and s.vendee_key = r.consumers_key and s.possessors_key = n.consumers_key;
 
 SELECT * FROM view_flows;
+
+UPDATE view_flows SET possessors_key = 10 WHERE flows_key = 15; -- Не применяется, выдает ошибку "FLOWS_KEY": invalid identifier
+UPDATE view_flows SET bottom_line_price = 777777.77 WHERE flows_key = 15; -- Не применяется, выдает ошибку "FLOWS_KEY": invalid identifier
 
 
 -- Создать обновляемое представление для работы с одной из родительских таблиц индивидуальной БД и через него разрешить работу с данными только в рабочие дни (с понедельника по пятницу) и в рабочие часы (с 9:00 до 17:00)
