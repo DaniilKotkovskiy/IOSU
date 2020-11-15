@@ -386,22 +386,116 @@ UPDATE view_consumer
 
 ------------------------------------------------------------------------------------- ПРОЦЕДУРЫ И ФУНКЦИИ -----------------------------------------------------------------------------------------
 
-CREATE OR REPLACE myPackage
+create or replace myPackage
 IS 
        sumCostEXep1 number;
        PROCEDURE CHANGE_SALARY (minsal IN number);
        FUNCTION cont_staff (staff IN EMPLOYEE.EMPLOYEE_KEY%TYPE, depart IN DEPARTMENT.NAME%TYPE) RETURN VARCHAR2;
 END myPackage;
 
-/*CREATE OR REPLACE myPackage
+
+/*
+create or replace myPackage
 IS 
        newTelNum CHAR(17);
        PROCEDURE CHANGE_NUMBER (newTelNum IN CHAR(17));
        FUNCTION tel_vender (vender IN VERDER.VENDERS_KEY%TYPE) RETURN VARCHAR2;
-END myPackage;*/
+END myPackage;
+*/
 
 
-       
+create or replace PACKAGE BODY myPackage
+IS
+
+PROCEDURE CHANGE_SALARY(minsal IN number)
+is
+
+CURSOR get_sal IS
+       SELECT c.CONTRACT_KEY,p.salary*c.SALARY_RATE AS SAL,EMPLOYEE_KEY,c.SALARY_RATE
+       FROM position p join contract c ON p.position_key=c.position_key
+
+newsal position.salary%TYPE;
+newsall position.salary%TYPE;
+
+BEGIN
+
+ FOR v_gt IN get_sal
+
+ LOOP
+  IF v_gt.sal<minsal THEN
+  newsal:= v_gt.SALARY_RATE*1.2;
+  newsall:= newsal*v_gt.SAL;
+       UPDATE contract set SALARY_RATE=newsal where CONTRACT_KEY=v_gt.contract_key;
+       DMBS_OUTPUT.PUT_LINE('Сотрудник '||v_gt.EMPLOYEE_KEY||': старая з/пл = '||v_gt.SAL||', новая з/пл = '||newsall);
+  ELSIF v_gt.sal>minsal*1.5 THEN
+  newsal:= v_gt.SALARY_RATE*1.05;
+   newsall:= newsal*v_gt.SAL;
+  UPDATE contract set SALARY_RATE=newsal where CONTRACT_KEY=v_gt.contract_key;
+    DMBS_OUTPUT.PUT_LINE('Сотрудник '||v_gt.EMPLOYEE_KEY||': старая з/пл = '||v_gt.SAL||', новая з/пл = '||newsall);
+  ELSE
+  DMBS_OUTPUT.PUT_LINE('Сотрудник не нуждается в доплате');
+   END IF;
+END LOOP;
+
+       EXCEPTION
+              WHEN NO_DATA_FOUND THEN
+                     DMBS_OUTPUT.PUT_LINE ('Ошибка: не найдено значение');
+
+END;
+
+FUNCTION cont_staff(staff IN EMPLOYEE.EMPLOYEE_KEY%TYPE,
+                                   depart IN DEPARTMENT.NAME%TYPE)
+RETURN VARCHAR2
+IS
+
+OUT_ST VARCHAR2(5);
+INBL NUMBER;
+TEL_NOMB employee.tel_no%TYPE;
+
+BEGIN
+
+SELECT COUNT(c.CONTRACT_KEY) INTO INBL
+FROM contract c join DEPARTMENT d ON c.DEPARTMENT_KEY=d.DEPARTMENT_KEY
+WHERE EMPLOYEE_KEY=staff and NAME=depart;
+
+select TEL_NO INTO TEL_NOMB FROM EMPLOYEE WHERE EMPLOYEE_KEY = staff;
+
+
+       IF INBL <> 0 THEN
+       OUT_ST := 'TRUE';
+       ELSE
+       OUT_ST := 'FALSE';
+       DMBS_OUTPUT.PUT_LINE('Телефон сотрудника :'|| TEL_NOMB);
+       END IF;
+
+       RETURN(OUT_ST);
+
+       EXCEPTION
+              WHEN NO_DATA_FOUND THEN
+                     DMBS_OUTPUT.PUT_LINE ('Ошибка: по заданным критериям информация не найдена');
+                     return null;
+              WHEN OTHERS THEN
+                     DMBS_OUTPUT.PUT_LINE ('Unexpected error');
+                     return null;
+END;
+
+
+
+BEGIN
+       myPackage.CHANGE_SALARY(3000);
+       myPackage.sumCostEXep1 := myPackage.cont_staff(1, 'Автоматизации');
+       DMBS_OUTPUT.PUT_LINE (' '|| myPackage.sumCostEXep1);
+       myPackage.sumCostEXep2 := myPackage.cont_staff(1232, 'АвтоматизЗации');
+       DMBS_OUTPUT.PUT_LINE (' '|| myPackage.sumCostEXep2);
+       myPackage.sumCostEXep3 := myPackage.cont_staff(1, 'Истории');
+       DMBS_OUTPUT.PUT_LINE (' '|| myPackage.sumCostEXep3);
+END;
+
+
+
+
+
+
 
 
 
