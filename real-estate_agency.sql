@@ -382,8 +382,26 @@ UPDATE view_consumer
 
 
 
-       
 
+
+------------------------------------------------------------------------------------- ПРОЦЕДУРЫ И ФУНКЦИИ -----------------------------------------------------------------------------------------
+
+CREATE OR REPLACE myPackage
+IS 
+       sumCostEXep1 number;
+       PROCEDURE CHANGE_SALARY (minsal IN number);
+       FUNCTION cont_staff (staff IN EMPLOYEE.EMPLOYEE_KEY%TYPE, depart IN DEPARTMENT.NAME%TYPE) RETURN VARCHAR2;
+END myPackage;
+
+/*CREATE OR REPLACE myPackage
+IS 
+       newTelNum CHAR(17);
+       PROCEDURE CHANGE_NUMBER (newTelNum IN CHAR(17));
+       FUNCTION tel_vender (vender IN VERDER.VENDERS_KEY%TYPE) RETURN VARCHAR2;
+END myPackage;*/
+
+
+       
 
 
 
