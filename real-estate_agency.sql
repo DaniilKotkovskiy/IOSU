@@ -543,6 +543,18 @@ ALTER TABLE immovables
 SELECT * FROM view_immovables_for_sale
 
 
+SELECT OBJECT_NAME, OBJECT_TYPE, STATUS  -- просмотр существующих процедур и функций
+FROM USER_OBJECTS 
+WHERE OBJECT_TYPE IN ('PROCEDURE', 'FUNCTION');
+
+DROP PROCEDURE FIND_VENDERS_PHONE; -- удаление процедуры
+
+
+
+
+
+
+
 
 
 
