@@ -402,16 +402,20 @@ CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN CHAR, new_vender_
 vender_tel VENDER.telephone_number%TYPE;
 
 BEGIN
-SELECT telephone_number INTO vender_tel
-FROM vender WHERE second_name = vend_second_name;
+       SELECT telephone_number INTO vender_tel
+              FROM vender 
+              WHERE second_name = vend_second_name;
 
 IF vender_tel <> new_vender_tel THEN
-UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = vend_second_name;
+       UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = vend_second_name;
 COMMIT;
 DBMS_OUTPUT.PUT_LINE ('Сотрудник '||vend_second_name||': старый номер телефона = '||vender_tel||', новый номер телефона = '||new_vender_tel);
 ELSE
 DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
 END IF;
+              EXCEPTION
+                      WHEN NO_DATA_FOUND THEN
+                            DBMS_OUTPUT.PUT_LINE ('Ошибка: значение не найдено!');
 END;
 /
 
