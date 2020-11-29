@@ -437,6 +437,109 @@ END;
 
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-- 1st явный курсор + OPEN, FETCH, CLOSE 
+
+CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR) 
+IS
+
+CURSOR vender_tel_cur
+IS
+    SELECT telephone_number
+            FROM vender
+            WHERE second_name = vend_second_name;
+
+vender_tel VENDER.telephone_number%TYPE;
+
+BEGIN
+
+        OPEN vender_tel_cur;
+        FETCH vender_tel_cur INTO vender_tel;
+
+IF vender_tel <> new_vender_tel THEN
+       UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = vend_second_name;
+COMMIT;
+    DBMS_OUTPUT.PUT_LINE ('Сотрудник '||vend_second_name||': старый номер телефона = '||vender_tel||', новый номер телефона = '||new_vender_tel);
+ELSE
+    DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
+END IF;
+        EXCEPTION
+                      WHEN NO_DATA_FOUND THEN
+                            DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+CLOSE vender_tel_cur;
+END;
+/
+
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+END;
+/
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => '1111', new_vender_tel => '+375(17)340-15-01');
+END;
+/
+
+-- Применительно к моей структуре БД не нужно контролировать уникальность номера телефона принадлежащего продавцу, т.к. в соответствии с бизнес логикой за одним рабочим местом может быть закреплено долее одного продавца.
+
+
+-- 2nd явный курсор + данные из курсора
+
+CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR) 
+IS
+
+CURSOR vender_tel_cur
+IS
+    SELECT telephone_number, second_name
+            FROM vender
+            WHERE second_name = vend_second_name;
+
+var1 VENDER.telephone_number%TYPE;
+
+BEGIN
+
+    FOR var1 IN vender_tel_cur
+
+LOOP
+
+IF var1.telephone_number <> new_vender_tel THEN
+       UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = var1.second_name;
+COMMIT;
+    DBMS_OUTPUT.PUT_LINE ('Сотрудник '||var1.second_name||': старый номер телефона = '||var1.telephone_number||', новый номер телефона = '||new_vender_tel);
+ELSE
+    DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
+END IF;
+END LOOP;
+
+        EXCEPTION
+                      WHEN NO_DATA_FOUND THEN
+                            DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+
+END;
+/
+
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+END;
+/
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => 'qqqqqqq', new_vender_tel => '+375(17)340-15-01');
+END;
+/
+
+-- Применительно к моей структуре БД не нужно контролировать уникальность номера телефона принадлежащего продавцу, т.к. в соответствии с бизнес логикой за одним рабочим местом может быть закреплено долее одного продавца.
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
 
 
 
