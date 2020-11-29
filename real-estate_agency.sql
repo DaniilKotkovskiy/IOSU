@@ -398,9 +398,8 @@ UPDATE view_consumer
 
 -- 1. Написать процедуру изменения мобильного номера продавца по указанной в качестве параметра фамилии. Контролировать, чтобы повторно не был введен тот же номер.:
 
-CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN CHAR, new_vender_tel IN CHAR) 
-IS
-vender_tel VENDER.telephone_number%TYPE;
+CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR) IS
+vender_tel CHAR(17);
 
 BEGIN
        SELECT telephone_number INTO vender_tel
