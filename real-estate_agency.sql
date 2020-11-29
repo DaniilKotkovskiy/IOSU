@@ -399,7 +399,7 @@ UPDATE view_consumer
 -- 1. Написать процедуру изменения мобильного номера продавца по указанной в качестве параметра фамилии. Контролировать, чтобы повторно не был введен тот же номер.:
 
 CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR) IS
-vender_tel CHAR(17);
+vender_tel VENDER.telephone_number%TYPE;
 
 BEGIN
        SELECT telephone_number INTO vender_tel
@@ -409,9 +409,9 @@ BEGIN
 IF vender_tel <> new_vender_tel THEN
        UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = vend_second_name;
 COMMIT;
-DBMS_OUTPUT.PUT_LINE ('Сотрудник '||vend_second_name||': старый номер телефона = '||vender_tel||', новый номер телефона = '||new_vender_tel);
+       DBMS_OUTPUT.PUT_LINE ('Сотрудник '||vend_second_name||': старый номер телефона = '||vender_tel||', новый номер телефона = '||new_vender_tel);
 ELSE
-DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
+       DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
 END IF;
               EXCEPTION
                       WHEN NO_DATA_FOUND THEN
@@ -423,10 +423,12 @@ END;
 BEGIN
 CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
 END;
+/
 
 BEGIN
 CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(17)340-15-01');
 END;
+/
 
 -- Применительно к моей структуре БД не нужно контролировать уникальность номера телефона принадлежащего продавцу, т.к. в соответствии с бизнес логикой за одним рабочим местом может быть закреплено долее одного продавца.
 
