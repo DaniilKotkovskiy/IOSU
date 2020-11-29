@@ -416,6 +416,8 @@ END IF;
               EXCEPTION
                       WHEN NO_DATA_FOUND THEN
                             DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+                      WHEN OTHERS THEN
+                            DBMS_OUTPUT.PUT_LINE ('Unexpected error'); 
 END;
 /
 
@@ -466,6 +468,8 @@ END IF;
         EXCEPTION
                       WHEN NO_DATA_FOUND THEN
                             DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+                      WHEN OTHERS THEN
+                            DBMS_OUTPUT.PUT_LINE ('Unexpected error'); 
 CLOSE vender_tel_cur;
 END;
 /
@@ -515,6 +519,8 @@ END LOOP;
         EXCEPTION
                       WHEN NO_DATA_FOUND THEN
                             DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+                      WHEN OTHERS THEN
+                            DBMS_OUTPUT.PUT_LINE ('Unexpected error'); 
 
 END;
 /
@@ -535,8 +541,21 @@ END;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+-- 2. Создать функцию, подсчитывающую количество сделок, совершенных потенциальными покупателями за текущий день. В вызывающую среду возвращать объекты недвижимости, участвующие в этих сделках.
 
-
+CREATE OR REPLACE FUNCTION get_sum_flows
+       RETURN VARCHAR2
+IS
+   --RESULT  COUNT ;
+d VARCHAR2(500);
+BEGIN
+   SELECT COUNT (flows_key) INTO d
+       FROM flows
+       WHERE TO_CHAR (transaction_date_and_time, DD) = TO_CHAR (SYSDATE, DD);
+   --RESULT:= (dateval - d) YEAR TO MONTH;
+RETURN d;
+END;
+/
 
 
 
