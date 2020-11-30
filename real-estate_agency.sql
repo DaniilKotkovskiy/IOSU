@@ -563,7 +563,7 @@ END;
 
 CREATE OR REPLACE PACKAGE myPackage
 IS
-    Num NUMBER;
+    Num VARCHAR2(500);
     PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR);
     FUNCTION get_sum_flows RETURN VARCHAR2;
 END myPackage;
@@ -659,8 +659,6 @@ BEGIN
 END;
 
 -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
 
 
 
