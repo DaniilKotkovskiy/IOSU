@@ -568,6 +568,7 @@ IS
     FUNCTION get_sum_flows RETURN VARCHAR2;
 END myPackage;
 
+
 CREATE OR REPLACE PACKAGE BODY myPackage
 IS
 
@@ -579,8 +580,8 @@ IS
 CURSOR vender_tel_cur
 IS
     SELECT telephone_number, second_name
-            FROM vender
-            WHERE second_name = vend_second_name;
+        FROM vender
+        WHERE second_name = vend_second_name;
 
 var1 VENDER.telephone_number%TYPE;
 
@@ -588,20 +589,21 @@ BEGIN
 
     FOR var1 IN vender_tel_cur
 
-LOOP
-
-IF var1.telephone_number <> new_vender_tel THEN
-       UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = var1.second_name;
-COMMIT;
-    DBMS_OUTPUT.PUT_LINE ('Сотрудник '||var1.second_name||': старый номер телефона = '||var1.telephone_number||', новый номер телефона = '||new_vender_tel);
-ELSE
-    DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
-END IF;
-END LOOP;
+    LOOP
+    IF var1.telephone_number <> new_vender_tel THEN
+        UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = var1.second_name;
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE ('Сотрудник '||var1.second_name||': старый номер телефона = '||var1.telephone_number||', новый номер телефона = '||new_vender_tel);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
+    END IF;
+    END LOOP;
 
         EXCEPTION
-                      WHEN NO_DATA_FOUND THEN
-                            DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+            WHEN NO_DATA_FOUND THEN
+                DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE ('Warning: Unexpected error!');
 
 END;
 
@@ -615,27 +617,34 @@ counter NUMBER;
 
 BEGIN
 
-SELECT COUNT (flows_key) INTO counter
-    FROM flows
-    WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY');
+    SELECT COUNT (flows_key) INTO counter
+        FROM flows
+        WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY');
 
     IF counter <> 0 THEN
-
-    SELECT article_immov INTO out_article_immov
-        FROM immovables s, flows r
-        WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY') and s.immovable_key = r.immovable_key;
-    DBMS_OUTPUT.PUT_LINE ('Объект недвижимости участвовал в сделке сегодня: '||out_article_immov);
+        SELECT article_immov INTO out_article_immov
+            FROM immovables s, flows r
+            WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY') and s.immovable_key = r.immovable_key;
+            DBMS_OUTPUT.PUT_LINE ('Объект недвижимости участвовал в сделке сегодня: '||out_article_immov);
     ELSE
-    out_article_immov := 'FALSE';
-    DBMS_OUTPUT.PUT_LINE ('Сегодня нет совершенных сделок');
-END IF;
-RETURN (out_article_immov);
-END;
+        out_article_immov := 'FALSE';
+        DBMS_OUTPUT.PUT_LINE ('Сегодня нет совершенных сделок');
+    END IF;
+    
+    RETURN (out_article_immov);
+
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенные значения!');
+                RETURN null;
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE ('Warning: Unexpected error!');
+                RETURN null;
 
 END;
 
-
-
+END;
+/
 
 -- ВЫЗОВ --
 
