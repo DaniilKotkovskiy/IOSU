@@ -661,7 +661,208 @@ END;
 -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
+CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR) 
+IS
 
+CURSOR vender_tel_cur
+IS
+    SELECT telephone_number
+            FROM vender
+            WHERE second_name = vend_second_name;
+
+var2 VARCHAR2(500);
+
+BEGIN
+    SELECT second_name INTO var2
+        FROM vender
+        WHERE second_name = vend_second_name;
+    FOR var1 IN vender_tel_cur
+
+LOOP
+
+IF var1.telephone_number <> new_vender_tel THEN
+       UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = var2;
+COMMIT;
+    DBMS_OUTPUT.PUT_LINE ('Сотрудник '||var2||': старый номер телефона = '||var1.telephone_number||', новый номер телефона = '||new_vender_tel);
+ELSE
+    DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
+END IF;
+END LOOP;
+
+        EXCEPTION
+                      WHEN NO_DATA_FOUND THEN
+                            DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенное имя сотрудника!');
+                      WHEN OTHERS THEN
+                            DBMS_OUTPUT.PUT_LINE ('Warning: Unexpected error!');
+
+END;
+/
+
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+CHANGE_TELNUM (vend_second_name => 'qqqqqq', new_vender_tel => '+375(17)340-15-01');
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(17)340-wwwwwwww');
+END;
+/
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(17)340-15-01');
+END;
+/
+
+-- Применительно к моей структуре БД не нужно контролировать уникальность номера телефона принадлежащего продавцу, т.к. в соответствии с бизнес логикой за одним рабочим местом может быть закреплено долее одного продавца.
+
+
+
+
+CREATE OR REPLACE FUNCTION get_sum_flows
+RETURN VARCHAR2
+IS
+
+CURSOR article_cur
+IS
+SELECT article_immov
+                        FROM immovables s, flows r
+                        WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY') and s.immovable_key = r.immovable_key;
+
+counter number;
+
+BEGIN
+
+    SELECT COUNT (flows_key) INTO counter
+        FROM flows
+        WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY');
+
+    IF counter <> 0 THEN
+        FOR var1 IN article_cur
+        loop
+        DBMS_OUTPUT.PUT_LINE ('Объект недвижимости участвовавший сегодня в сделке: '||var1.article_immov);
+        end loop;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE ('Сегодня нет совершенных сделок');
+    END IF;
+
+RETURN (counter);
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE ('Warning: Unexpected error!');
+                RETURN null;
+
+END;
+/
+
+
+DECLARE
+Num number;
+BEGIN
+    Num := get_sum_flows;
+END;
+
+
+
+-- НА ПРОВЕРКУ 01.12
+
+CREATE OR REPLACE PACKAGE myPackage
+IS
+    Num VARCHAR2(500);
+    PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR);
+    FUNCTION get_sum_flows RETURN VARCHAR2;
+END myPackage;
+
+
+CREATE OR REPLACE PACKAGE BODY myPackage
+IS
+
+-- ПРОЦЕДУРА --
+
+PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR) 
+IS
+
+CURSOR vender_tel_cur
+IS
+    SELECT telephone_number
+            FROM vender
+            WHERE second_name = vend_second_name;
+
+var2 VARCHAR2(500);
+
+BEGIN
+    SELECT second_name INTO var2
+        FROM vender
+        WHERE second_name = vend_second_name;
+    FOR var1 IN vender_tel_cur
+
+LOOP
+
+IF var1.telephone_number <> new_vender_tel THEN
+       UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = var2;
+COMMIT;
+    DBMS_OUTPUT.PUT_LINE ('Сотрудник '||var2||': старый номер телефона = '||var1.telephone_number||', новый номер телефона = '||new_vender_tel);
+ELSE
+    DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
+END IF;
+END LOOP;
+
+        EXCEPTION
+                      WHEN NO_DATA_FOUND THEN
+                            DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенное имя сотрудника!');
+                      WHEN OTHERS THEN
+                            DBMS_OUTPUT.PUT_LINE ('Warning: Unexpected error!');
+
+END;
+
+-- ФУНКЦИЯ --
+
+FUNCTION get_sum_flows
+RETURN VARCHAR2
+IS
+
+CURSOR article_cur
+IS
+SELECT article_immov
+                        FROM immovables s, flows r
+                        WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY') and s.immovable_key = r.immovable_key;
+
+counter number;
+
+BEGIN
+
+    SELECT COUNT (flows_key) INTO counter
+        FROM flows
+        WHERE TO_CHAR (transaction_date_and_time, 'DD') = TO_CHAR (SYSDATE, 'DD') and TO_CHAR (transaction_date_and_time, 'MM') = TO_CHAR (SYSDATE, 'MM') and TO_CHAR (transaction_date_and_time, 'YY') = TO_CHAR (SYSDATE, 'YY');
+
+    IF counter <> 0 THEN
+        FOR var1 IN article_cur
+        loop
+        DBMS_OUTPUT.PUT_LINE ('Объект недвижимости участвовавший сегодня в сделке: '||var1.article_immov);
+        end loop;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE ('Сегодня нет совершенных сделок');
+    END IF;
+
+RETURN (counter);
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE ('Warning: Unexpected error!');
+                RETURN null;
+
+END;
+
+END;
+/
+
+-- ВЫЗОВ --
+
+BEGIN
+    myPackage.CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+    myPackage.CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+    myPackage.CHANGE_TELNUM (vend_second_name => 'qqqqqqqqqq', new_vender_tel => '+375(17)340-15-01');
+    myPackage.CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(17)340wwwwww');
+    DBMS_OUTPUT.PUT_LINE (' ');
+    myPackage.Num := myPackage.get_sum_flows;
+END;
 
 
 
