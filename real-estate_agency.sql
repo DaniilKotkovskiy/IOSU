@@ -869,6 +869,81 @@ END;
 
 
 
+-- 1st of 4th DONE WITH Local
+
+CREATE OR REPLACE PROCEDURE CHANGE_TELNUM (vend_second_name IN VARCHAR2, new_vender_tel IN CHAR) 
+IS
+
+CURSOR vender_tel_cur
+IS
+    SELECT telephone_number
+            FROM vender
+            WHERE second_name = vend_second_name;
+
+TYPE VEND_SECNAM_TYPE IS RECORD (second_name vender.second_name%TYPE := 0);
+
+VSN VEND_SECNAM_TYPE;
+---------------------------------------------------------------------
+FUNCTION get_second_name (var1 IN VARCHAR2)
+RETURN VEND_SECNAM_TYPE
+IS
+result VEND_SECNAM_TYPE;
+BEGIN
+SELECT second_name INTO result
+        FROM vender
+        WHERE second_name = vend_second_name;
+RETURN result;
+END get_second_name;
+---------------------------------------------------------------------
+
+BEGIN
+
+    VSN := get_second_name(vend_second_name);
+
+    FOR var1 IN vender_tel_cur
+
+LOOP
+
+IF var1.telephone_number <> new_vender_tel THEN
+       UPDATE VENDER SET telephone_number = new_vender_tel WHERE second_name = vend_second_name;
+COMMIT;
+    DBMS_OUTPUT.PUT_LINE ('Сотрудник '||vend_second_name||': старый номер телефона = '||var1.telephone_number||', новый номер телефона = '||new_vender_tel);
+ELSE
+    DBMS_OUTPUT.PUT_LINE ('Номер уже принадлежит данному сотруднику');
+END IF;
+END LOOP;
+
+        EXCEPTION
+                      WHEN NO_DATA_FOUND THEN
+                            DBMS_OUTPUT.PUT_LINE ('Ошибка: проверьте введенное имя сотрудника!');
+                      WHEN OTHERS THEN
+                            DBMS_OUTPUT.PUT_LINE ('Warning: Unexpected error!');
+
+END;
+/
+
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(11)111-11-11');
+CHANGE_TELNUM (vend_second_name => 'qqqqqq', new_vender_tel => '+375(17)340-15-01');
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(17)340-wwwwwwww');
+END;
+/
+
+BEGIN
+CHANGE_TELNUM (vend_second_name => 'Karbisheva', new_vender_tel => '+375(17)340-15-01');
+END;
+/
+
+-- Применительно к моей структуре БД не нужно контролировать уникальность номера телефона принадлежащего продавцу, т.к. в соответствии с бизнес логикой за одним рабочим местом может быть закреплено долее одного продавца.
+
+
+
+
+
+
+
 /*
 
 ********************************************************* ГОТОВЫЕ ПРЕСЕТЫ: ***********************************************************
