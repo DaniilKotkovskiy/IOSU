@@ -598,6 +598,45 @@ END;
 */
 
 
+-- LOG1 --
+
+CREATE TABLE LOG1 (USER_NAME VARCHAR2(500),
+                   CHANGE_DATE_TIME TIMESTAMP,
+                   TYPE_OF_CHANGE VARCHAR2(6),
+                   OLD_STATUS VARCHAR2(14),
+                   NEW_STATUS VARCHAR2(14)
+                  );
+
+
+CREATE OR REPLACE TRIGGER log1
+AFTER INSERT or UPDATE or DELETE
+ON immovables
+FOR EACH ROW
+
+DECLARE
+    quality VARCHAR2(6);
+    old_val VARCHAR2(14);
+    new_val VARCHAR2(14);
+
+BEGIN
+
+    CASE
+    WHEN INSERTING THEN
+                        quality := 'INSERT';
+                        new_val := :NEW.status_;
+    WHEN UPDATING THEN
+                        quality := 'UPDATE';
+                        old_val := :OLD.status_;
+                        new_val := :NEW.status_;
+    WHEN DELETING THEN
+                        quality := 'DELETE';
+                        old_val := :OLD.status_;
+    END CASE;
+    INSERT INTO log1 (USER_NAME, CHANGE_DATE_TIME, TYPE_OF_CHANGE, OLD_STATUS, NEW_STATUS)
+    VALUES (USER, SYSTIMESTAMP, quality, old_val, new_val);
+
+END;
+/
 
 
 
