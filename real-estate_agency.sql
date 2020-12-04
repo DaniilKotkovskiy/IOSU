@@ -639,7 +639,9 @@ END;
 /
 
 
-
+insert into immovables values (24, 'House number 55', '10.12.2020', 2, '888000.88', 'Minsk city, Evgenia Glebova street, house 55', 'partisanskiy', 'for_sale');
+UPDATE immovables SET status_ = 'sold' WHERE immovable_key = 24;
+DELETE FROM immovables WHERE immovable_key = 24;
 
 
 
