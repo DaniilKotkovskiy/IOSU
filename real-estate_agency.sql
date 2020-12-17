@@ -364,7 +364,7 @@ SELECT second_name, first_name, middle_name, registration, telephone_number, age
 
 1. В БД создать:
     - горизонтальное обновляемое представление;
-    - вертикальное или смешанное необновляемое представление, пред-назначенное для работы с основной задачей БД (в представлении должны содержаться сведения из главной таблицы, но вместо внешних ключей необ-ходимо использовать связанные данные из родительской таблицы);
+    - вертикальное или смешанное необновляемое представление, предназначенное для работы с основной задачей БД (в представлении должны содержаться сведения из главной таблицы, но вместо внешних ключей необ-ходимо использовать связанные данные из родительской таблицы);
 
 2. Проверить обновляемость горизонтального представления с фразой WITH CHECK OPTION при помощи инструкций UPDATE, DELETE или INSERT (привести пример правильной и неправильной инструкции).
 3. Создать обновляемое представление для работы с одной из роди-тельских таблиц индивидуальной БД и через него разрешить работу с дан-ными только в рабочие дни (с понедельника по пятницу) и в рабочие часы (с 9:00 до 17:00).
@@ -396,7 +396,7 @@ insert into view_immovables_for_sale values (21, 'Apartment number 99', '12.11.1
 insert into view_immovables_for_sale values (22, 'House number 16', '11.05.2005', 2, '660000.38', 'Minsk city, Evgenia Glebova street, house 16', 'partisanskiy', 'off_the_market');
 insert into view_immovables_for_sale values (23, 'House number 22', '09.14.2008', 2, '780000.66', 'Minsk city, Evgenia Glebova street, house 22', 'partisanskiy', 'off_the_market');
 
--- Вертикальное или смешанное необновляемое представление, пред-назначенное для работы с основной задачей БД (в представлении должны содержаться сведения из главной таблицы, но вместо внешних ключей необ-ходимо использовать связанные данные из родительской таблицы)
+-- Вертикальное или смешанное необновляемое представление, предназначенное для работы с основной задачей БД (в представлении должны содержаться сведения из главной таблицы, но вместо внешних ключей необ-ходимо использовать связанные данные из родительской таблицы)
 
 CREATE OR REPLACE VIEW view_flows AS
                   SELECT p.article_tature "ТИП СДЕЛКИ", b.second_name ||' '|| b.first_name ||' '|| b.middle_name "ФИО ПРОДАВЦА", r.second_name ||' '|| r.first_name ||' '|| r.middle_name "ФИО ПОКУПАТЕЛЯ", f.article_immov "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ", bottom_line_price "СТОИМОСТЬ", transaction_date_and_time "ДАТА И ВРЕМЯ СДЕЛКИ", n.second_name ||' '|| n.first_name ||' '|| n.middle_name "ФИО ВЛАДЕЛЬЦА"
@@ -639,9 +639,234 @@ END;
 /
 
 
-insert into immovables values (24, 'House number 55', '10.12.2020', 2, '888000.88', 'Minsk city, Evgenia Glebova street, house 55', 'partisanskiy', 'for_sale');
+INSERT INTO immovables VALUES (24, 'House number 55', '10.12.2020', 2, '888000.88', 'Minsk city, Evgenia Glebova street, house 55', 'partisanskiy', 'for_sale');
 UPDATE immovables SET status_ = 'sold' WHERE immovable_key = 24;
 DELETE FROM immovables WHERE immovable_key = 24;
+
+
+-- LOG2 --
+
+CREATE TABLE LOG2 (USER_NAME VARCHAR2(500),
+                   CHANGE_DATE_TIME TIMESTAMP,
+                   TYPE_OF_CHANGE VARCHAR2(10),
+                   CHANGED_TABLE VARCHAR2(50)
+                  );
+
+
+CREATE OR REPLACE TRIGGER log2
+BEFORE CREATE or ALTER or DROP OR TRUNCATE
+ON SCHEMA
+
+DECLARE
+BEGIN
+
+    IF TO_CHAR (SYSDATE, 'HH24') >= '03' AND TO_CHAR (SYSDATE, 'HH24') <= '21' THEN
+        INSERT INTO LOG2 (USER_NAME, CHANGE_DATE_TIME, TYPE_OF_CHANGE, CHANGED_TABLE)
+        VALUES (USER, SYSTIMESTAMP, ORA_SYSEVENT, ORA_DICT_OBJ_NAME);
+    ELSE
+        RAISE_APPLICATION_ERROR(-20000, 'Невозможно изменить или добавить элемент БД');
+    END IF;
+
+END;
+/
+
+
+CREATE TABLE LOG3 (USER_NAME VARCHAR2(500),
+                   CHANGE_DATE_TIME TIMESTAMP,
+                   TYPE_OF_CHANGE VARCHAR2(10),
+                   CHANGED_TABLE VARCHAR2(50)
+                  );
+DROP TABLE LOG3 CASCADE CONSTRAINTS PURGE;
+ALTER TABLE LOG3 MODIFY TYPE_OF_CHANGE VARCHAR2(500);
+TRUNCATE TABLE LOG3;
+
+
+-- LOG3 --
+
+CREATE TABLE LOG3 (USER_NAME VARCHAR2(500),
+                   DATE_TIME TIMESTAMP,
+                   COUNT_FLOWS VARCHAR2(500)
+                  );
+
+
+CREATE OR REPLACE TRIGGER LOG_OFF
+BEFORE LOGOFF ON DATABASE
+
+DECLARE
+
+counter VARCHAR2(500);
+
+BEGIN
+
+    SELECT COUNT (flows_key) INTO counter
+        FROM flows;
+    INSERT INTO LOG3 VALUES (ORA_LOGIN_USER, SYSTIMESTAMP, counter);
+
+END;
+/
+
+
+
+CREATE OR REPLACE TRIGGER LOG_ON
+AFTER LOGON ON DATABASE
+
+DECLARE
+
+counter VARCHAR2(500);
+
+BEGIN
+
+    SELECT COUNT (flows_key) INTO counter
+        FROM flows;
+    INSERT INTO LOG3 VALUES (ORA_LOGIN_USER, SYSTIMESTAMP, counter);
+
+END;
+/
+
+
+-- My business logic --
+
+CREATE OR REPLACE TRIGGER SET_NEW_purchase
+FOR INSERT ON flows
+COMPOUND TRIGGER
+
+immov_key NUMBER;
+pur NUMBER (11,2);
+pur1 NUMBER (11,2);
+article VARCHAR2 (150);
+
+BEFORE EACH ROW
+IS
+
+BEGIN
+
+SELECT immovable_key INTO immov_key
+    FROM immovables
+    WHERE immovable_key = :NEW.immovable_key;
+
+SELECT purchase INTO pur
+    FROM immovables
+    WHERE immovable_key = :NEW.immovable_key;
+
+SELECT article_immov INTO article
+    FROM immovables
+    WHERE immovable_key = :NEW.immovable_key;
+
+END BEFORE EACH ROW;
+
+AFTER STATEMENT 
+IS
+
+BEGIN
+
+    pur1 := (pur*1.02);
+    UPDATE flows SET bottom_line_price = pur1 WHERE immovable_key = immov_key;
+    DBMS_OUTPUT.PUT_LINE ('Данные о конечной стоимости ОН - ' || article || ' - таблицы FLOWS были пересчитаны! Стоимость с учетом комиссии составит: ' || pur1);
+
+END AFTER STATEMENT;
+
+END;
+/
+
+
+----------------------------------
+
+
+CREATE OR REPLACE TRIGGER SET_NEW_purchase
+AFTER INSERT ON flows
+
+
+DECLARE
+
+CURSOR immov_key_immovables_cur
+IS
+SELECT n.immovable_key, r.purchase
+    FROM immovables r, flows n
+    WHERE r.immovable_key = n.immovable_key;
+
+BEGIN
+
+    DBMS_OUTPUT.PUT_LINE ('Данные о конечной стоимости ОН таблицы FLOWS были пересчитаны!');
+    
+    FOR var1 IN immov_key_immovables_cur
+    LOOP
+           
+        UPDATE flows SET bottom_line_price = (var1.purchase*1.02) WHERE immovable_key = var1.immovable_key;
+        
+    END LOOP;
+
+END;
+/
+
+
+insert into flows values (16, 1, 1, 1, 23, '100000.67', '06-DEC-2020 06.17.00.401527 PM', 4);
+
+
+-- INSTEAD OF --
+
+CREATE OR REPLACE VIEW view_flows2 AS
+    SELECT immovable_key, article_immov "Название ОН", bottom_line_price "Конечная стоимость"
+        FROM flows INNER JOIN immovables USING (immovable_key);
+
+        SELECT * from view_flows2;
+
+
+CREATE OR REPLACE TRIGGER UPDATE_view_flows2
+INSTEAD OF UPDATE ON view_flows2
+FOR EACH ROW
+
+DECLARE
+
+BEGIN
+
+    UPDATE immovables SET article_immov = :NEW."Название ОН" WHERE immovable_key = :NEW.immovable_key;
+
+END;
+/
+
+
+UPDATE view_flows2 SET "Название ОН" = 'TEST' WHERE immovable_key = 2;
+
+
+CREATE OR REPLACE VIEW view_flows AS
+                  SELECT p.article_tature "ТИП СДЕЛКИ", b.second_name ||' '|| b.first_name ||' '|| b.middle_name "ФИО ПРОДАВЦА", r.second_name ||' '|| r.first_name ||' '|| r.middle_name "ФИО ПОКУПАТЕЛЯ", f.article_immov "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ", bottom_line_price "СТОИМОСТЬ", transaction_date_and_time "ДАТА И ВРЕМЯ СДЕЛКИ", n.second_name ||' '|| n.first_name ||' '|| n.middle_name "ФИО ВЛАДЕЛЬЦА"
+                         FROM flows s, tature_of_transactions p, vender b, consumer r, immovables f, consumer n
+                         WHERE p.tature_of_transactions_key = s.tature_of_transaction_key and b.venders_key = s.venders_key and f.immovable_key = s.immovable_key and s.vendee_key = r.consumers_key and s.possessors_key = n.consumers_key;
+
+SELECT * FROM view_flows;
+
+
+CREATE OR REPLACE TRIGGER UPDATE_view_flows
+INSTEAD OF UPDATE ON view_flows
+FOR EACH ROW
+
+DECLARE
+
+IK NUMBER;
+
+BEGIN
+
+
+    SELECT immovable_key INTO IK
+        FROM immovables 
+        WHERE article_immov = :OLD."НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ";
+
+    UPDATE immovables SET article_immov = :NEW."НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ" WHERE immovable_key = IK;
+
+    DBMS_OUTPUT.PUT_LINE ('Название ОН - '||:OLD."НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ"||' - заменено на - '||:NEW."НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ");
+
+END;
+/
+
+
+UPDATE view_flows SET "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ" = 'TEST' WHERE "НАЗВАНИЕ ОБЪЕКТА НЕДВИЖИМОСТИ" = 'Apartment number 6';
+
+
+
+
+
+
+
 
 
 
