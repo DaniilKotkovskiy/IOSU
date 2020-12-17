@@ -761,6 +761,7 @@ BEGIN
 
     pur1 := (pur*1.02);
     UPDATE flows SET bottom_line_price = pur1 WHERE immovable_key = immov_key;
+    UPDATE immovables SET article_immov = '\F/ - '|| ' ' || article_immov WHERE immovable_key = immov_key;
     DBMS_OUTPUT.PUT_LINE ('Данные о конечной стоимости ОН - ' || article || ' - таблицы FLOWS были пересчитаны! Стоимость с учетом комиссии составит: ' || pur1);
 
 END AFTER STATEMENT;
