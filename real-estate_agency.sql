@@ -685,6 +685,7 @@ TRUNCATE TABLE LOG3;
 
 CREATE TABLE LOG3 (USER_NAME VARCHAR2(500),
                    DATE_TIME TIMESTAMP,
+                   OPERATION VARCHAR2 (7),
                    COUNT_FLOWS VARCHAR2(500)
                   );
 
@@ -700,7 +701,7 @@ BEGIN
 
     SELECT COUNT (flows_key) INTO counter
         FROM flows;
-    INSERT INTO LOG3 VALUES (ORA_LOGIN_USER, SYSTIMESTAMP, counter);
+    INSERT INTO LOG3 VALUES (ORA_LOGIN_USER, SYSTIMESTAMP, 'LOG OFF', counter);
 
 END;
 /
@@ -718,7 +719,7 @@ BEGIN
 
     SELECT COUNT (flows_key) INTO counter
         FROM flows;
-    INSERT INTO LOG3 VALUES (ORA_LOGIN_USER, SYSTIMESTAMP, counter);
+    INSERT INTO LOG3 VALUES (ORA_LOGIN_USER, SYSTIMESTAMP, 'LOG ON', counter);
 
 END;
 /
